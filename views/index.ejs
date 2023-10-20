@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой блог</title>
+    <style>
+        /* Стили для визуального оформления */
+        /* ... */
+    </style>
+</head>
+<body>
+    <h1>Мой блог</h1>
+
+    <!-- Форма для создания новой статьи -->
+    <h2>Создать статью</h2>
+    <form action="/create-article" method="POST" enctype="multipart/form-data">
+        <label for="title">Заголовок:</label>
+        <input type="text" id="title" name="title" required><br>
+
+        <label for="subtitle">Подзаголовок:</label>
+        <input type="text" id="subtitle" name="subtitle"><br>
+
+        <label for="content">Текст статьи:</label><br>
+        <textarea id="content" name="content" rows="5" required></textarea><br>
+
+        <label for="image">Картинки:</label>
+        <input type="file" id="image" name="image" multiple accept="image/*"><br>
+
+        <label for="link">Ссылки:</label>
+        <input type="text" id="link" name="link"><br>
+
+        <input type="submit" value="Создать">
+    </form>
+
+    <!-- Вывод списка статей -->
+    <h2>Список статей</h2>
+    <ul>
+        <% articles.forEach(function(article) { %>
+            <li>
+                <h3><%= article.title %></h3>
+                <p><%= article.subtitle %></p>
+                <p><%= article.content %></p>
+                <!-- Остальные поля статьи -->
+            </li>
+        <% }) %>
+    </ul>
+</body>
+</html>
