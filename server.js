@@ -12,7 +12,8 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'webapp-service-db'
+  database: 'webapp-service-db',
+  multipleStatements: true // Разрешает выполнение нескольких SQL-запросов в одном вызове
 });
 
 // Установка соединения с базой данных
@@ -29,6 +30,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static('uploads'));
+
+app.use(express.urlencoded({ extended: true })); // Парсинг данных формы
 
 app.get('/', (req, res) => {
   const sql = 'SELECT * FROM articles';
@@ -62,13 +65,12 @@ app.post('/create-article', upload.array('image'), (req, res) => {
     const articleId = result.insertId;
 
     const imageSql = 'INSERT INTO images (article_id, file_name) VALUES (?, ?)';
-    images.forEach((image) => {
-      const imageValues = [articleId, image.filename];
-      connection.query(imageSql, imageValues, (err) => {
-        if (err) {
-          console.error('Ошибка выполнения запроса: ', err);
-        }
-      });
+    const imageValues = images.map((image) => [articleId, image.filename]);
+
+    connection.query(imageSql, [imageValues], (err) => {
+      if (err) {
+        console.error('Ошибка выполнения запроса: ', err);
+      }
     });
 
     res.redirect('/article?id=' + articleId);
