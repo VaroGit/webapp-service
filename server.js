@@ -100,6 +100,6 @@ app.get('/article', (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('Сервер запущен на порту 3000');
+app.listen(3306, () => {
+  console.log('Сервер запущен на порту 3306');
 });
