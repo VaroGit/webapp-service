@@ -4,7 +4,6 @@ const mysql = require('mysql2');
 const ejs = require('ejs');
 const path = require('path');
 
-
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
@@ -26,36 +25,11 @@ connection.connect((err) => {
 });
 
 // Настройка шаблонизатора EJS
-app.set('view engine', 'ejs'); // Устанавливаем движок шаблонов EJS
-app.set('views', path.join(__dirname, 'views')); // Устанавливаем папку с представлениями
-
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static('uploads'));
 
-// Главная страница
-
-// Обработка создания статьи
-app.post('/create-article', upload.array('image'), (req, res) => {
-    // Получение данных из формы
-    const title = req.body.title;
-    const subtitle = req.body.subtitle;
-    const content = req.body.content;
-    const images = req.files;
-    const link = req.body.link;
-
-    // Выполнение запроса к базе данных
-    const sql = 'INSERT INTO articles (title, subtitle, content, images, link) VALUES (?, ?, ?, ?, ?)';
-    const values = [title, subtitle, content, JSON.stringify(images[0].path), link];
- 
-    connection.query(sql, values, (err, result) => {
-        if (err) {
-            console.error('Ошибка выполнения запроса: ', err);
-            return;
-        }
-        console.log('Статья успешно создана');
-        res.send('Статья создана успешно!');
-    });
-});
 app.get('/', (req, res) => {
   const sql = 'SELECT * FROM articles';
 
@@ -68,19 +42,62 @@ app.get('/', (req, res) => {
     res.render('index', { articles: results });
   });
 });
-app.get('/article', (req, res) => {
-  const title = req.query.title;
-  const subtitle = req.query.subtitle;
-  const content = req.query.content;
-  const images = req.query.images;
-  const link = req.query.link;
-  // Здесь можно передать данные статьи в представление и отобразить их
 
-  res.render('article', { title: title, subtitle: subtitle, content: content, images: images, link: link });
+app.post('/create-article', upload.array('image'), (req, res) => {
+  const title = req.body.title;
+  const subtitle = req.body.subtitle;
+  const content = req.body.content;
+  const images = req.files;
+  const link = req.body.link;
+
+  const sql = 'INSERT INTO articles (title, subtitle, content, link) VALUES (?, ?, ?, ?)';
+  const values = [title, subtitle, content, link];
+
+  connection.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Ошибка выполнения запроса: ', err);
+      return res.status(500).send('Ошибка выполнения запроса!');
+    }
+
+    const articleId = result.insertId;
+
+    const imageSql = 'INSERT INTO images (article_id, file_name) VALUES (?, ?)';
+    images.forEach((image) => {
+      const imageValues = [articleId, image.filename];
+      connection.query(imageSql, imageValues, (err) => {
+        if (err) {
+          console.error('Ошибка выполнения запроса: ', err);
+        }
+      });
+    });
+
+    res.redirect('/article?id=' + articleId);
+  });
 });
 
-// Маршрут для отображения списка статей
-// Запуск сервера
+app.get('/article', (req, res) => {
+  const articleId = req.query.id;
+
+  const articleSql = 'SELECT * FROM articles WHERE id = ?';
+  const imageSql = 'SELECT * FROM images WHERE article_id = ?';
+
+  connection.query(articleSql, [articleId], (err, articleResult) => {
+    if (err) {
+      console.error('Ошибка выполнения запроса: ', err);
+      return;
+    }
+
+    connection.query(imageSql, [articleId], (err, imageResults) => {
+      if (err) {
+        console.error('Ошибка выполнения запроса: ', err);
+        return;
+      }
+
+      res.render('article', { article: articleResult[0], images: imageResults });
+    });
+  });
+});
+
 app.listen(3000, () => {
-    console.log('Сервер запущен на порту 3000');
+  console.log('Сервер запущен на порту 3000');
 });

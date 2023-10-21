@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><%= title %></title>
+    <title><%= article.title %></title>
     <!-- Дополнительные стили и скрипты -->
 </head>
 <body>
-  <h1><%= title %></h1>
-  <h2><%= subtitle %></h2>
-  <p><%= content %></p>
+    <h1><%= article.title %></h1>
+    <h2><%= article.subtitle %></h2>
+    <p><%= article.content %></p>
+
+    <!-- Вывод изображений -->
+    <% images.forEach(function(image) { %>
+        <img src="/<%= image.file_name %>" alt="Изображение">
+    <% }) %>
+    <a href="<%= article.link %>"><p><%= article.link %></p></a>
     <!-- Остальная разметка страницы статьи -->
 </body>
 </html>
