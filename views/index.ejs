@@ -38,9 +38,11 @@
     <ul>
         <% articles.forEach(function(article) { %>
             <li>
-                <h3><%= article.title %></h3>
-                <p><%= article.subtitle %></p>
-                <p><%= article.content %></p>
+                <a href="/article?title=<%= encodeURIComponent(article.title) %>&subtitle=<%= encodeURIComponent(article.subtitle) %>&content=<%= encodeURIComponent(article.content) %>">
+                <p>Статья: <%= article.title %></p>
+                <% if (article.imageFileName) { %>
+                    <img src="/uploads/<%= article.imageFileName %>" alt="Изображение статьи">
+                <% } %>
                 <!-- Остальные поля статьи -->
             </li>
         <% }) %>

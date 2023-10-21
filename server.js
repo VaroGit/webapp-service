@@ -30,7 +30,7 @@ app.set('view engine', 'ejs'); // Устанавливаем движок шаб
 app.set('views', path.join(__dirname, 'views')); // Устанавливаем папку с представлениями
 
 
-app.use(express.static('public'));
+app.use(express.static('uploads'));
 
 // Главная страница
 
@@ -45,8 +45,8 @@ app.post('/create-article', upload.array('image'), (req, res) => {
 
     // Выполнение запроса к базе данных
     const sql = 'INSERT INTO articles (title, subtitle, content, images, link) VALUES (?, ?, ?, ?, ?)';
-    const values = [title, subtitle, content, JSON.stringify(images), link];
-
+    const values = [title, subtitle, content, JSON.stringify(images[0].path), link];
+ 
     connection.query(sql, values, (err, result) => {
         if (err) {
             console.error('Ошибка выполнения запроса: ', err);
@@ -68,6 +68,17 @@ app.get('/', (req, res) => {
     res.render('index', { articles: results });
   });
 });
+app.get('/article', (req, res) => {
+  const title = req.query.title;
+  const subtitle = req.query.subtitle;
+  const content = req.query.content;
+  const images = req.query.images;
+  const link = req.query.link;
+  // Здесь можно передать данные статьи в представление и отобразить их
+
+  res.render('article', { title: title, subtitle: subtitle, content: content, images: images, link: link });
+});
+
 // Маршрут для отображения списка статей
 // Запуск сервера
 app.listen(3000, () => {
